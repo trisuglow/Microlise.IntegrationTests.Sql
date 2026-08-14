@@ -17,7 +17,8 @@ namespace Microlise.IntegrationTests.Sql.GovernanceTests
 
             var sql = @"
                 SELECT
-	                ISNULL(R.ROUTINE_SCHEMA + '.' + R.ROUTINE_NAME, '') + '?' + ISNULL(R.ROUTINE_DEFINITION, '')
+	                [Name] = ISNULL(R.ROUTINE_SCHEMA + '.' + R.ROUTINE_NAME, ''),
+                    Definition = ISNULL(R.ROUTINE_DEFINITION, '')
                 FROM
 	                INFORMATION_SCHEMA.ROUTINES R
                 WHERE
@@ -31,9 +32,8 @@ namespace Microlise.IntegrationTests.Sql.GovernanceTests
                         ( " + string.Join(", ", _testFilter.FilterList.Select(e => $"'{e.Key}'")) + " )";
             }
 
-            var raw = IntegrationTestDatabase.Query<string>(sql);
+            var definitions = IntegrationTestDatabase.Query<(string Name, string Definition)>(sql).ToDictionary(o => o.Name, o => o.Definition);
 
-            Dictionary<string, string> definitions = raw.ToDictionary(r => r.Split('?')[0], r => r.Split('?')[1]);
 
             StringBuilder failures = new();
 
@@ -41,7 +41,7 @@ namespace Microlise.IntegrationTests.Sql.GovernanceTests
 
             foreach (var definition in definitions)
             {
-                if (definition.Value.Replace(" ", "").Replace("\t", "").Contains("SELECT*"))
+                if (definition.Value.Replace(" ", "").Replace("\n", "").Replace("\r", "").Replace("\t", "").Contains("SELECT*"))
                 {
                     failures.AppendLine(definition.Key);
                 }
