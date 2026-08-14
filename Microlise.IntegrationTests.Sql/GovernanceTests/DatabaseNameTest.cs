@@ -1,4 +1,5 @@
-﻿using Microlise.IntegrationTests.Sql.GovernanceTests.BaseClass;
+﻿using Dapper;
+using Microlise.IntegrationTests.Sql.GovernanceTests.BaseClass;
 using NUnit.Framework;
 
 namespace Microlise.IntegrationTests.Sql.GovernanceTests;
@@ -7,7 +8,7 @@ public class DatabaseNameTest : GovernanceTestBase
 {
     public override void RunTestExecution()
     {
-        var dbName = IntegrationTestDatabase.ExecuteScalar<string>("SELECT DB_NAME()");
+        var dbName = IntegrationTestDatabase.QueryFirstOrDefault<string>("SELECT DB_NAME()") ?? "";
 
         if (_testFilter is not null && _testFilter.FilterList.ContainsKey(dbName))
         {

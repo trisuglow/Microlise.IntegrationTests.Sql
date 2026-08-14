@@ -18,7 +18,7 @@ namespace Template.Integration.Tests
         [Test]
         public void DoorStateEnumeration_MatchesDatabaseLookupTable()
         {
-            EnumLookupValidation.AssertEnumMatchesDatabase<DoorState>("dbo.tbl_Session", "UserID", "userEmailAddress");
+            EnumLookupValidation.AssertEnumMatchesDatabase<DoorState>("dbo.DoorState", "DoorStateID", "DoorStateDescription");
         }
 
         [Test]

@@ -1,4 +1,5 @@
-﻿using Microlise.IntegrationTests.Sql.GovernanceTests.BaseClass;
+﻿using Dapper;
+using Microlise.IntegrationTests.Sql.GovernanceTests.BaseClass;
 using NUnit.Framework;
 using System.Text;
 
@@ -30,7 +31,7 @@ namespace Microlise.IntegrationTests.Sql.GovernanceTests
                         ( " + string.Join(", ", _testFilter.FilterList.Select(e => $"'{e.Key}'")) + " )";
             }
 
-            var raw = IntegrationTestDatabase.Fetch<string>(sql);
+            var raw = IntegrationTestDatabase.Query<string>(sql);
 
             Dictionary<string, string> definitions = raw.ToDictionary(r => r.Split('?')[0], r => r.Split('?')[1]);
 

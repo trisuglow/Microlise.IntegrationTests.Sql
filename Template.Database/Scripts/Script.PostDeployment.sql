@@ -1,4 +1,4 @@
 ﻿INSERT dbo.DoorState (DoorStateId, DoorStateDescription)
 VALUES
-	(1, 'Open'),
-	(2, 'Closed')
+	(0, 'Open'),
+	(1, 'Closed')

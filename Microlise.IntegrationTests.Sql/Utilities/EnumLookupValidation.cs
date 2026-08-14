@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using Dapper;
+using NUnit.Framework;
 
 namespace Microlise.IntegrationTests.Sql.Utilities
 {
@@ -6,7 +7,7 @@ namespace Microlise.IntegrationTests.Sql.Utilities
     {
         public static void AssertEnumMatchesDatabase<T>(string databaseTable, string enumIdColumn, string enumNameColumn) where T : Enum
         {
-            var databaseValues = IntegrationTestDatabase.Fetch<EnumFromDatabase>($@"
+            var databaseValues = IntegrationTestDatabase.Query<EnumFromDatabase>($@"
                 SELECT
                     EnumId = {enumIdColumn},
                     EnumName = {enumNameColumn}

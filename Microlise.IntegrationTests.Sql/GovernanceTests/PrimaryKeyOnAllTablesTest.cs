@@ -1,4 +1,5 @@
-﻿using Microlise.IntegrationTests.Sql.GovernanceTests.BaseClass;
+﻿using Dapper;
+using Microlise.IntegrationTests.Sql.GovernanceTests.BaseClass;
 using NUnit.Framework;
 
 namespace Microlise.IntegrationTests.Sql.GovernanceTests;
@@ -30,7 +31,7 @@ public class PrimaryKeyOnAllTablesTest : GovernanceTestBase
                         ( " + string.Join(", ", _testFilter.FilterList.Select(e => $"'{e.Key}'")) + " )";
         }
 
-        var tablesWithNoPrimaryKey = IntegrationTestDatabase.Fetch<string>(sql);
+        var tablesWithNoPrimaryKey = IntegrationTestDatabase.Query<string>(sql);
 
         Assert.That(
             tablesWithNoPrimaryKey,

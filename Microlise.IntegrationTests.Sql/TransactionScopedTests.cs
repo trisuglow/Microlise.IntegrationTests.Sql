@@ -1,6 +1,7 @@
-﻿using Microsoft.Extensions.Configuration;
-using PetaPoco;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 using System.Configuration;
+using System.Data;
 using System.Transactions;
 
 namespace Microlise.IntegrationTests.Sql;
@@ -21,16 +22,11 @@ public abstract class TransactionScopedTests
         }
     }
 
-    internal static IDatabase IntegrationTestDatabase
+    internal static IDbConnection IntegrationTestDatabase
     {
         get
         {
-            var db = DatabaseConfiguration.Build()
-                .UsingConnectionString(ConnectionString)
-                .UsingProvider<PetaPoco.Providers.SqlServerMsDataDatabaseProvider>()
-                .Create();
-
-            return db;
+            return new SqlConnection(ConnectionString);
         }
     }
 

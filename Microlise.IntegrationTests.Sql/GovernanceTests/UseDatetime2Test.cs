@@ -1,4 +1,5 @@
-﻿using Microlise.IntegrationTests.Sql.GovernanceTests.BaseClass;
+﻿using Dapper;
+using Microlise.IntegrationTests.Sql.GovernanceTests.BaseClass;
 using NUnit.Framework;
 
 namespace Microlise.IntegrationTests.Sql.GovernanceTests;
@@ -26,7 +27,7 @@ public class UseDatetime2Test : GovernanceTestBase
                         ( " + string.Join(", ", _testFilter.FilterList.Select(e => $"'{e.Key}'")) + " )";
         }
 
-        var dateTypeUsage = IntegrationTestDatabase.Fetch<string>(sql);
+        var dateTypeUsage = IntegrationTestDatabase.Query<string>(sql);
 
         Assert.That(
             dateTypeUsage,
