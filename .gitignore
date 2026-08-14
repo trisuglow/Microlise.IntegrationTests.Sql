@@ -1,0 +1,36 @@
+# This is the global ignore file for the Amber repo.
+# *** PLEASE DO NOT ADD FILES/FOLDERS TO THIS LIST IN AN ADHOC MANNER. ***
+# Only build/test output and user level files and folders should be ingored.
+
+*.cvsignore
+*.suo
+*.user
+*ReSharper*
+*.testsettings
+*.ncrunchproject
+UpgradeLog.XML
+**/bin
+**/obj
+**/.vs
+**/TestResults
+**/*.log
+**/_UpgradeReport_Files
+**/_NCrunch*
+**/packages
+/development/output.build
+/development/output.release
+/development/source/sql/**/StagingArea
+/development/source/sql/**/WorkFolder
+/development/source/sql/**/SQL_Errors.txt
+/development/source/sql/**/TSQLT_SQL_Errors.txt
+
+*.ncrunchsolution
+/development/source/code/VehicleTrackingService/Amber.Services.VTS.Setup/Harvest
+/development/source/code/VehicleTrackingService/Amber.Services.VTS.Setup/Amber.Services.VehicleTrackingService.auto.wxs
+/build
+/release
+/development/source/UpgradeLog.htm
+/development/source/sql/Amber Upgrade Scripts/upgradeScriptFiles.progress
+/development/source/code/Services/WebHost/AmberServices.txt
+**nCrunchTemp**
+*.pubxml

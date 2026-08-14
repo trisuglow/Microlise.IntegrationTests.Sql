@@ -1,0 +1,9 @@
+<Solution>
+  <Project Path="Microlise.IntegrationTests.Sql/Microlise.IntegrationTests.Sql.csproj" />
+  <Project Path="Template.Application/Template.Application.csproj" Id="96f57818-1b1b-4305-96bd-6cd87cf23d82" />
+  <Project Path="Template.Database/Template.Database.sqlproj" Id="db0c5aef-3da4-4812-87ac-68e6910c4c44">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="Template.Integration.Tests/Template.Integration.Tests.csproj" />
+</Solution>
