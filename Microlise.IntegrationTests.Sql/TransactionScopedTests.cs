@@ -6,7 +6,7 @@ using System.Transactions;
 
 namespace Microlise.IntegrationTests.Sql;
 
-public abstract class TransactionScopedTests
+public class TransactionScopedTests
 {
     private TransactionScope _transactionScope;
 
@@ -18,7 +18,9 @@ public abstract class TransactionScopedTests
             builder.AddJsonFile(Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json"));
 
             var root = builder.Build();
-            return root.GetConnectionString("IntegrationTest") ?? throw new ConfigurationErrorsException("Expecting to find a connection string called 'IntegrationTest' in an appsettings.json file in the test project.");
+            return root.GetConnectionString("IntegrationTest") ?? 
+                throw new Exception("Expecting to find a connection string called 'IntegrationTest' in an appsettings.json file in the test project.");
+                //throw new ConfigurationErrorsException("Expecting to find a connection string called 'IntegrationTest' in an appsettings.json file in the test project.");
         }
     }
 

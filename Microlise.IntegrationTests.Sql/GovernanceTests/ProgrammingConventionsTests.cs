@@ -5,15 +5,12 @@ using System.Text;
 
 namespace Microlise.IntegrationTests.Sql.GovernanceTests
 {
-    [FilterFormat(@"\w+[.]\w+[.]\w+")]
-    public class DoNotUseSelectStarTest : GovernanceTestBase
+    public class ProgrammingConventionsTests : GovernanceTestBase
     {
-        public override void RunTestExecution()
+        [Test]
+        [FilterFormat(@"\w+[.]\w+[.]\w+")]
+        public void DoNotUseSelectStarTest()
         {
-
-
-            
-            // DO NOT USE ? AS A SEPARATOR. EITHER FIND A BETTER WAY OF GETTING A DICTIONARY OUT, OR USE CHAR(7) (e.g.)
 
             var sql = @"
                 SELECT

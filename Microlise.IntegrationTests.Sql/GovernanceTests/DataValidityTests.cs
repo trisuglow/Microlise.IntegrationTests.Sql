@@ -4,10 +4,13 @@ using NUnit.Framework;
 
 namespace Microlise.IntegrationTests.Sql.GovernanceTests;
 
-[FilterFormat(@"\w+[.]\w+")]
-public class PrimaryKeyOnAllTablesTest : GovernanceTestBase
+
+public class DataValidityTests : GovernanceTestBase
 {
-    public override void RunTestExecution()
+
+    [Test]
+    [FilterFormat(@"\w+[.]\w+")]
+    public void PrimaryKeyOnAllTablesTest()
     {
         var sql = @"
                 SELECT
@@ -34,7 +37,7 @@ public class PrimaryKeyOnAllTablesTest : GovernanceTestBase
         var tablesWithNoPrimaryKey = IntegrationTestDatabase.Query<string>(sql);
 
         Assert.That(
-            tablesWithNoPrimaryKey,
+            tablesWithNoPrimaryKey.ToList(),
             Has.Count.EqualTo(0),
             $"Most tables should have a primary key. PK missing on tables {string.Join(", ", tablesWithNoPrimaryKey.Select(c => $"'{c}'"))}.");
     }
