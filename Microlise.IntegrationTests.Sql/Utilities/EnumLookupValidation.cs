@@ -1,11 +1,10 @@
 ﻿using Dapper;
-using Microlise.IntegrationTests.Sql.GovernanceTests.BaseClass;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 
 namespace Microlise.IntegrationTests.Sql.Utilities
 {
-    public class EnumLookupValidation : DiBase
+    public class EnumLookupValidation : TransactionScopedTests
     {
         public static void AssertEnumMatchesDatabase<T>(string databaseTable, string enumIdColumn, string enumNameColumn) where T : Enum
         {
@@ -34,10 +33,6 @@ namespace Microlise.IntegrationTests.Sql.Utilities
             });
         }
 
-        protected override void ConfigureServices(IServiceCollection services)
-        {
-            throw new NotImplementedException();
-        }
 
         private class EnumFromDatabase
         {

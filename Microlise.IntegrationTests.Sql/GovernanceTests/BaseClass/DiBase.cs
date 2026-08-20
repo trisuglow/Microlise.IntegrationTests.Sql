@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using System.Data;
@@ -40,6 +41,24 @@ public abstract class DiBase //: TransactionScopedTests
     {
         get
         {
+            Console.WriteLine("Getting IntegrationTestDatabase");
+
+
+            try
+            {
+
+                IConfiguration config = new ConfigurationBuilder().AddJsonFile("appsetting.json").Build();
+
+                Console.WriteLine(config.ToString());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex}");
+            }
+
+
+
+
             //var connection = Services.GetRequiredService<DbConnection>();
             //return connection;
 

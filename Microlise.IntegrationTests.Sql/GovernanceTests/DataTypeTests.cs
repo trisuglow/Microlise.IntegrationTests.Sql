@@ -69,8 +69,4 @@ public class DataTypeTests : GovernanceTestBase
             $"Avoid using NUMERIC. Prefer to use DECIMAL for consistency (as it is functionally the same) on columns {string.Join(", ", numericTypeUsage.Select(c => $"'{c}'"))}.");
     }
 
-    protected override void ConfigureServices(IServiceCollection services)
-    {
-        throw new NotImplementedException();
-    }
 }

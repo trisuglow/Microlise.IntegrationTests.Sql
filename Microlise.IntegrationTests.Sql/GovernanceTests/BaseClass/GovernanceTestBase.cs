@@ -6,7 +6,7 @@ using System.Data.Common;
 namespace Microlise.IntegrationTests.Sql.GovernanceTests.BaseClass;
 
 
-public abstract class GovernanceTestBase : DiBase
+public abstract class GovernanceTestBase : TransactionScopedTests
 {
 
 

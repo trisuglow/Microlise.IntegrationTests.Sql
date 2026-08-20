@@ -17,27 +17,27 @@ public class TransactionScopedTests
 
     private TransactionScope _transactionScope;
 
-    //protected static string ConnectionString
-    //{
-    //    get
-    //    {
-    //        var builder = new ConfigurationBuilder();
-    //        builder.AddJsonFile(Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json"));
+    protected static string ConnectionString
+    {
+        get
+        {
+            var builder = new ConfigurationBuilder();
+            builder.AddJsonFile(Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json"));
 
-    //        var root = builder.Build();
-    //        return root.GetConnectionString("IntegrationTest") ?? 
-    //            throw new Exception("Expecting to find a connection string called 'IntegrationTest' in an appsettings.json file in the test project.");
-    //            //throw new ConfigurationErrorsException("Expecting to find a connection string called 'IntegrationTest' in an appsettings.json file in the test project.");
-    //    }
-    //}
+            var root = builder.Build();
+            return root.GetConnectionString("IntegrationTest") ??
+                throw new Exception("Expecting to find a connection string called 'IntegrationTest' in an appsettings.json file in the test project.");
+            //throw new ConfigurationErrorsException("Expecting to find a connection string called 'IntegrationTest' in an appsettings.json file in the test project.");
+        }
+    }
 
-    //internal static IDbConnection IntegrationTestDatabase
-    //{
-    //    get
-    //    {
-    //        return new SqlConnection(ConnectionString);
-    //    }
-    //}
+    internal static IDbConnection IntegrationTestDatabase
+    {
+        get
+        {
+            return new SqlConnection(ConnectionString);
+        }
+    }
 
     //[SetUp]
     //public void Setup()
