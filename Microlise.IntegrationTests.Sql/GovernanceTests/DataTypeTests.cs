@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Microlise.IntegrationTests.Sql.GovernanceTests.BaseClass;
+using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 
 namespace Microlise.IntegrationTests.Sql.GovernanceTests;
@@ -66,5 +67,10 @@ public class DataTypeTests : GovernanceTestBase
             numericTypeUsage.ToList(),
             Has.Count.EqualTo(0),
             $"Avoid using NUMERIC. Prefer to use DECIMAL for consistency (as it is functionally the same) on columns {string.Join(", ", numericTypeUsage.Select(c => $"'{c}'"))}.");
+    }
+
+    protected override void ConfigureServices(IServiceCollection services)
+    {
+        throw new NotImplementedException();
     }
 }

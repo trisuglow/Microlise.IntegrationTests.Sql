@@ -1,9 +1,11 @@
 ﻿using Dapper;
+using Microlise.IntegrationTests.Sql.GovernanceTests.BaseClass;
+using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 
 namespace Microlise.IntegrationTests.Sql.Utilities
 {
-    public class EnumLookupValidation : TransactionScopedTests
+    public class EnumLookupValidation : DiBase
     {
         public static void AssertEnumMatchesDatabase<T>(string databaseTable, string enumIdColumn, string enumNameColumn) where T : Enum
         {
@@ -30,6 +32,11 @@ namespace Microlise.IntegrationTests.Sql.Utilities
                     Is.EquivalentTo(dv).Using<EnumFromDatabase>((x, y) => { return x.EnumId == y.EnumId && x.EnumName == y.EnumName; }),
                     "Expecting Int32 enumeration values to match exactly, one-to-one, with database records. Also expecting enum value names to match database records, ignoring underscores, hyphens, and slashes.");
             });
+        }
+
+        protected override void ConfigureServices(IServiceCollection services)
+        {
+            throw new NotImplementedException();
         }
 
         private class EnumFromDatabase
