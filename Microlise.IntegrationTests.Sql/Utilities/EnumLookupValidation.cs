@@ -1,5 +1,4 @@
 ﻿using Dapper;
-using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 
 namespace Microlise.IntegrationTests.Sql.Utilities
