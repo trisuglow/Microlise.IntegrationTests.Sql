@@ -1,6 +1,8 @@
 ﻿using Dapper;
 using Microlise.IntegrationTests.Sql.GovernanceTests.BaseClass;
 using NUnit.Framework;
+using NUnit.Framework.Internal;
+using System.Text;
 
 namespace Microlise.IntegrationTests.Sql.GovernanceTests;
 
@@ -11,7 +13,7 @@ public class DataValidityTests : GovernanceTestBase
     [FilterFormat(@"\w+[.]\w+")]
     public void PrimaryKeyOnAllTablesTest()
     {
-        var sql = @"
+        StringBuilder sql = new(@"
                 SELECT
                     OBJECT_SCHEMA_NAME(O.object_id) + '.' + OBJECT_NAME(O.object_id)
                 FROM 
@@ -23,17 +25,16 @@ public class DataValidityTests : GovernanceTestBase
                 AND
 	                O.[name] <> '__RefactorLog'
                 AND
-                    I.[name] IS NULL";
+                    I.[name] IS NULL");
 
-        if (_testFilter?.FilterList.Count > 0)
+        if (TestHasFilters())
         {
-            sql += @"
+            sql.AppendLine($@"
                 AND
-                    OBJECT_SCHEMA_NAME(O.object_id) + '.' + OBJECT_NAME(O.object_id) NOT IN
-                        ( " + string.Join(", ", _testFilter.FilterList.Select(e => $"'{e.Key}'")) + " )";
+                    OBJECT_SCHEMA_NAME(O.object_id) + '.' + OBJECT_NAME(O.object_id) NOT IN {TestFilterList()}");
         }
 
-        var tablesWithNoPrimaryKey = IntegrationTestDatabase.Query<string>(sql);
+        var tablesWithNoPrimaryKey = IntegrationTestDatabase.Query<string>(sql.ToString());
 
         Assert.That(
             tablesWithNoPrimaryKey.ToList(),

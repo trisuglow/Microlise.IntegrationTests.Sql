@@ -1,4 +1,6 @@
-﻿namespace Microlise.IntegrationTests.Sql
+﻿using Microlise.IntegrationTests.Sql.GovernanceTests.Filters;
+
+namespace Microlise.IntegrationTests.Sql
 {
     public class IntegrationTestLibraryConfiguration : IIntegrationTestLibraryConfiguration
     {
@@ -16,5 +18,6 @@
             }
         }
 
+        public Dictionary<string, List<string>> TestFilters { get; set; } = [];
     }
 }

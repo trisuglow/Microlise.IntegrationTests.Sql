@@ -69,5 +69,6 @@
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\DoorState.sql" />
+    <Build Include="dbo\Tables\BreakTheRules.sql" />
   </ItemGroup>
 </Project>

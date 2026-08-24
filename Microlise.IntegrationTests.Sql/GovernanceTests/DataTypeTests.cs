@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using Microlise.IntegrationTests.Sql.GovernanceTests.BaseClass;
 using NUnit.Framework;
+using System.Text;
 
 namespace Microlise.IntegrationTests.Sql.GovernanceTests;
 
@@ -10,7 +11,7 @@ public class DataTypeTests : GovernanceTestBase
     [FilterFormat(@"\w+[.]\w+[.]\w+")]
     public void UseDatetime2Test()
     {
-        var sql = @"
+        StringBuilder sql = new(@"
                 SELECT
                     OBJECT_SCHEMA_NAME(C.object_id) + '.' + OBJECT_NAME(C.object_id) + '.' + [name]
                 FROM
@@ -20,17 +21,16 @@ public class DataTypeTests : GovernanceTestBase
                 AND 
                     OBJECT_SCHEMA_NAME(C.object_id) <> 'INFORMATION_SCHEMA'
                 AND
-                    system_type_id = 61 /* DATETIME */";
+                    system_type_id = 61 /* DATETIME */");
 
-        if (_testFilter?.FilterList.Count > 0)
+        if (TestHasFilters())
         {
-            sql += @"
+            sql.AppendLine($@"
                 AND
-                    OBJECT_SCHEMA_NAME(C.object_id) + '.' + OBJECT_NAME(C.object_id) + '.' + [name] NOT IN 
-                        ( " + string.Join(", ", _testFilter.FilterList.Select(e => $"'{e.Key}'")) + " )";
+                    OBJECT_SCHEMA_NAME(C.object_id) + '.' + OBJECT_NAME(C.object_id) + '.' + [name] NOT IN {TestFilterList()}");
         }
 
-        var dateTypeUsage = IntegrationTestDatabase.Query<string>(sql);
+        var dateTypeUsage = IntegrationTestDatabase.Query<string>(sql.ToString());
 
         Assert.That(
             dateTypeUsage.ToList(),
@@ -40,9 +40,9 @@ public class DataTypeTests : GovernanceTestBase
 
     [Test]
     [FilterFormat(@"\w+[.]\w+[.]\w+")]
-    public void UseDecimalRatherThanNumeric()
+    public void UseDecimalRatherThanNumericTest()
     {
-        var sql = @"
+        StringBuilder sql = new( @"
                 SELECT
                     OBJECT_SCHEMA_NAME(C.object_id) + '.' + OBJECT_NAME(C.object_id) + '.' + [name]
                 FROM
@@ -50,17 +50,16 @@ public class DataTypeTests : GovernanceTestBase
                 WHERE
                     OBJECT_SCHEMA_NAME(C.object_id) <> 'sys'
                 AND
-                    system_type_id = 106 /* NUMERIC*/";
+                    system_type_id = 106 /* NUMERIC*/");
 
-        if (_testFilter?.FilterList.Count > 0)
+        if (TestHasFilters())
         {
-            sql += @"
+            sql.AppendLine($@"
                 AND
-                    OBJECT_SCHEMA_NAME(C.object_id) + '.' + OBJECT_NAME(C.object_id) + '.' + [name] NOT IN 
-                        ( " + string.Join(", ", _testFilter.FilterList.Select(e => $"'{e.Key}'")) + " )";
+                    OBJECT_SCHEMA_NAME(C.object_id) + '.' + OBJECT_NAME(C.object_id) + '.' + [name] NOT IN {TestFilterList()}");
         }
 
-        var numericTypeUsage = IntegrationTestDatabase.Query<string>(sql);
+        var numericTypeUsage = IntegrationTestDatabase.Query<string>(sql.ToString());
 
         Assert.That(
             numericTypeUsage.ToList(),

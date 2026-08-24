@@ -11,7 +11,7 @@ public class NamingTests : GovernanceTestBase
     {
         var dbName = IntegrationTestDatabase.QueryFirstOrDefault<string>("SELECT DB_NAME()") ?? "";
 
-        if (_testFilter is not null && _testFilter.FilterList.ContainsKey(dbName))
+        if (TestHasFilters() && TestFilterList().Contains($"'{dbName}'"))
         {
             return;
         }

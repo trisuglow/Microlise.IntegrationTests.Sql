@@ -20,17 +20,21 @@ public class TransactionScopedTests
             var builder = new ConfigurationBuilder();
             builder.AddJsonFile(Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json"));
 
-
             var root = builder.Build();
 
             var config = root.GetSection("IntegrationTestLibraryConfiguration").Get<IntegrationTestLibraryConfiguration>();
+            //IntegrationTestLibraryConfiguration config = new();
+
+            //config.ConnectionString = root.GetSection("IntegrationTestLibraryConfiguration").Get<IntegrationTestLibraryConfiguration>().ConnectionString;
+
+            if (string.IsNullOrWhiteSpace(config?.ConnectionString))
+            {
+                throw new ArgumentException("Expecting to find a section called 'Microlise.IntegrationTests.Sql' in an appsettings.json file in the test project.");
+            }
+
+            //config.TestFilters = root.GetSection("IntegrationTestLibraryConfiguration").GetSection("TestFilters").Get<Dictionary<string, List<string>>>();
 
 
-
-
-
-            //IntegrationTestConfiguration config = (IntegrationTestLibraryConfiguration)(root.GetSection("Microlise.IntegrationTests.Sql") ??
-            //        throw new Exception("Expecting to find a section called 'Microlise.IntegrationTests.Sql' in an appsettings.json file in the test project."));
 
             return config;
         }

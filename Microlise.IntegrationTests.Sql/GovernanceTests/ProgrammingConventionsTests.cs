@@ -12,24 +12,21 @@ namespace Microlise.IntegrationTests.Sql.GovernanceTests
         public void DoNotUseSelectStarTest()
         {
 
-            var sql = @"
+            StringBuilder sql = new(@"
                 SELECT
 	                [Name] = ISNULL(R.ROUTINE_SCHEMA + '.' + R.ROUTINE_NAME, ''),
                     Definition = ISNULL(R.ROUTINE_DEFINITION, '')
                 FROM
-	                INFORMATION_SCHEMA.ROUTINES R
-                WHERE
-	                1 = 1";
+	                INFORMATION_SCHEMA.ROUTINES R");
 
-            if (_testFilter?.FilterList.Count > 0)
+            if ( TestHasFilters())
             {
-                sql += @"
-                AND
-                    OBJECT_SCHEMA_NAME(C.object_id) + '.' + OBJECT_NAME(C.object_id) + '.' + [name] NOT IN 
-                        ( " + string.Join(", ", _testFilter.FilterList.Select(e => $"'{e.Key}'")) + " )";
+                sql.AppendLine( $@"
+                WHERE
+                    OBJECT_SCHEMA_NAME(C.object_id) + '.' + OBJECT_NAME(C.object_id) + '.' + [name] NOT IN {TestFilterList()}");
             }
 
-            var definitions = IntegrationTestDatabase.Query<(string Name, string Definition)>(sql).ToDictionary(o => o.Name, o => o.Definition);
+            var definitions = IntegrationTestDatabase.Query<(string Name, string Definition)>(sql.ToString()).ToDictionary(o => o.Name, o => o.Definition);
 
             StringBuilder failures = new();
 
