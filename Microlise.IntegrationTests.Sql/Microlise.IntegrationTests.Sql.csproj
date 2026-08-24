@@ -14,7 +14,7 @@
     <IsTestProject>true</IsTestProject>
     <Title>Microlise Integration Tests Library (SQL)</Title>
     <Company>Microlise</Company>
-    <Version>0.0.21</Version>
+    <Version>0.0.22</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,13 +24,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dapper" Version="2.1.79" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.2" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.11" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.11" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.11" />
-    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="17.8.0" />
-    <PackageReference Include="NUnit" Version="3.14.0" />
+    <PackageReference Include="Dapper" />
+    <PackageReference Include="Microsoft.Data.SqlClient" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" />
+    <PackageReference Include="NUnit" />
   </ItemGroup>
 
 </Project>
