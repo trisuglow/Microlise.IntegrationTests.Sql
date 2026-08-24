@@ -1,4 +1,6 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
 namespace Microlise.IntegrationTests.Sql.GovernanceTests.BaseClass;
 
@@ -19,6 +21,24 @@ public abstract class GovernanceTestBase : TransactionScopedTests
 
     protected string TestFilterList([CallerMemberName] string testName = "")
     {
-        return "( " + string.Join(", ", IntegrationTestConfiguration.TestFilters[$"{GetType().Name}.{testName}"].Select(e => $"'{e}'")) + " )";
+        var testFilterKey = $"{GetType().Name}.{testName}";
+        MethodBase? method = GetType().GetMethod(testName);
+
+        FilterFormatAttribute attr = (FilterFormatAttribute)method!.GetCustomAttributes(typeof(FilterFormatAttribute), true)[0];
+        string filterFormat = attr.Format;
+        var regex = new Regex(filterFormat);
+
+        var testFilters = IntegrationTestConfiguration.TestFilters[testFilterKey];
+
+        testFilters.ForEach(f =>
+        {
+            if (!regex.Match(f).Success)
+            {
+                throw new Exception($"Bad filter for {testFilterKey} - '{f}'. Should match regex [{filterFormat}]. Check appsettings.json file.");
+            }
+        });
+
+
+        return "( " + string.Join(", ", testFilters.Select(e => $"'{e}'")) + " )";
     }
 }

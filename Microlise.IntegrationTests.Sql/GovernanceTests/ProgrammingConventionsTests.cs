@@ -11,7 +11,6 @@ namespace Microlise.IntegrationTests.Sql.GovernanceTests
         [FilterFormat(@"\w+[.]\w+[.]\w+")]
         public void DoNotUseSelectStarTest()
         {
-
             StringBuilder sql = new(@"
                 SELECT
 	                [Name] = ISNULL(R.ROUTINE_SCHEMA + '.' + R.ROUTINE_NAME, ''),
