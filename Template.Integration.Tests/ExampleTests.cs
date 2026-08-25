@@ -5,8 +5,16 @@ using Template.Application;
 
 namespace Template.Integration.Tests
 {
-    public class Tests : TransactionScopedTests
+    /// <summary>
+    /// Use the library's TransactionScopedTests as a base class. This gives access to IntegrationTestDatabase for
+    /// data manipulation. All data changes made within the lifecycle of an individual test will be rolled back on
+    /// completion of the test, leaving the data in the database unchanged.
+    /// </summary>
+    public class ExampleTests : TransactionScopedTests
     {
+        /// <summary>
+        /// Use the library's AssertEnumMatchesDatabase assertion to validate a lookup table against an enumeration.
+        /// </summary>
         [Test]
         public void DoorStateEnumeration_MatchesDatabaseLookupTable()
         {

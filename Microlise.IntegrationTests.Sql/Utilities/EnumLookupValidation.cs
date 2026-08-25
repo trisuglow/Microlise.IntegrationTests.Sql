@@ -5,6 +5,13 @@ namespace Microlise.IntegrationTests.Sql.Utilities
 {
     public class EnumLookupValidation : TransactionScopedTests
     {
+        /// <summary>
+        /// Assert that there is a 1:1 match between a C# enumeration and the records in a lookup table.
+        /// </summary>
+        /// <typeparam name="T">The type of the enumeration, e.g. "StateValues".</typeparam>
+        /// <param name="databaseTable">The lookup table in the database, e.g. "dbo.StateValues".</param>
+        /// <param name="enumIdColumn">The column name of the numeric ID column in the lookup table.</param>
+        /// <param name="enumNameColumn">The column name of the description/name column in the lookup table.</param>
         public static void AssertEnumMatchesDatabase<T>(string databaseTable, string enumIdColumn, string enumNameColumn) where T : Enum
         {
             var databaseValues = IntegrationTestDatabase.Query<EnumFromDatabase>($@"
