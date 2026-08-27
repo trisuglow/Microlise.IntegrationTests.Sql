@@ -38,7 +38,11 @@ public abstract class GovernanceTestBase : TransactionScopedTests
             }
         });
 
-
         return "( " + string.Join(", ", testFilters.Select(e => $"'{e}'")) + " )";
+    }
+
+    protected static string FormattedFailureMessage(string message, IEnumerable<string> failureCases)
+    {
+        return $"{message}{Environment.NewLine}{string.Join($",{Environment.NewLine}", failureCases.Select(c => $"\t'{c}'"))}.";
     }
 }

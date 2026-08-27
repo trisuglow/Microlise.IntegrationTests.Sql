@@ -14,7 +14,7 @@
     <IsTestProject>true</IsTestProject>
     <Title>Microlise Integration Tests Library (SQL)</Title>
     <Company>Microlise</Company>
-    <Version>0.0.22</Version>
+    <Version>0.0.26</Version>
   </PropertyGroup>
 
   <ItemGroup>

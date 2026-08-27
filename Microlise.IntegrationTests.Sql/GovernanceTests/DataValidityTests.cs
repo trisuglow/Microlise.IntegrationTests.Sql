@@ -8,6 +8,32 @@ namespace Microlise.IntegrationTests.Sql.GovernanceTests;
 
 public class DataValidityTests : GovernanceTestBase
 {
+    [Test]
+    [FilterFormat(@"\w+[.]\w+")]
+    public void SelectFromAllViewsTest()
+    {
+        var executionCount = 0;
+        var views = IntegrationTestDatabase.Query<string>(@"
+            SELECT
+	            S.[name] + '.' + V.[name]
+            FROM
+	            sys.views V
+            JOIN
+	            sys.schemas S ON V.schema_id = S.schema_id
+            WHERE
+	            S.[name] <> 'tSQLt'");
+
+        foreach (var view in views)
+        {
+            Console.WriteLine($"Testing: {view}");
+
+            IntegrationTestDatabase.Execute($"SELECT * FROM {view}");
+
+            executionCount += 1;
+        }
+
+        Assert.That(executionCount, Is.EqualTo(views.Count()));
+    }
 
     [Test]
     [FilterFormat(@"\w+[.]\w+")]
@@ -39,7 +65,8 @@ public class DataValidityTests : GovernanceTestBase
         Assert.That(
             tablesWithNoPrimaryKey.ToList(),
             Has.Count.EqualTo(0),
-            $"Most tables should have a primary key. PK missing on tables {string.Join(", ", tablesWithNoPrimaryKey.Select(c => $"'{c}'"))}.");
+            FormattedFailureMessage(
+                "Most tables should have a primary key. PK missing on tables",
+                tablesWithNoPrimaryKey));
     }
-
 }

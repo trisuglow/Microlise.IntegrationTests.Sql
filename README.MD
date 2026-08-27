@@ -1,6 +1,6 @@
 # Introduction
 
-This library is intended to be added to SQL integration test projects as a NuGet reference.
+This library is intended to be added to NUnit3 SQL integration test projects as a NuGet reference.
 
 It provides the following features:
 1. A reference to the integration test database, using the Dapper micro-ORM, wrapped in a transaction scope that rolls back changes made during individual tests.
@@ -18,6 +18,8 @@ In order for the library to find the integration test database there must be a s
   }
 }
 ```
+
+Make sure that the appsettings.json file is marked as `Content` and `Copy to Output Directory if newer`.
 
 No other setup is required - governance tests should now run alongside the other tests in the integration test project.
 

@@ -35,7 +35,9 @@ public class DataTypeTests : GovernanceTestBase
         Assert.That(
             dateTypeUsage.ToList(),
             Has.Count.EqualTo(0),
-            $"Avoid using DATETIME. Prefer to use DATETIME2 instead on columns {string.Join(", ", dateTypeUsage.Select(c => $"'{c}'"))}.");
+            FormattedFailureMessage(
+                "Avoid using DATETIME. Prefer to use DATETIME2 instead on columns",
+                dateTypeUsage));
     }
 
     [Test]
@@ -64,6 +66,8 @@ public class DataTypeTests : GovernanceTestBase
         Assert.That(
             numericTypeUsage.ToList(),
             Has.Count.EqualTo(0),
-            $"Avoid using NUMERIC. Prefer to use DECIMAL for consistency (as it is functionally the same) on columns {string.Join(", ", numericTypeUsage.Select(c => $"'{c}'"))}.");
+            FormattedFailureMessage(
+                "Avoid using NUMERIC. Prefer to use DECIMAL for consistency (as it is functionally the same) on columns",
+                numericTypeUsage));
     }
 }

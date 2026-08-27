@@ -34,7 +34,7 @@ public class NamingTests : GovernanceTestBase
             FROM
 	            sys.all_columns C
             JOIN
-                sys.systypes S ON C.user_type_id = S.xusertype                    
+                sys.systypes S ON C.user_type_id = S.xusertype
             WHERE
                 OBJECT_SCHEMA_NAME(C.object_id) <> 'sys'
             AND 
@@ -58,6 +58,8 @@ public class NamingTests : GovernanceTestBase
         Assert.That(
             badlyNamedDateTypeColumns.ToList(),
             Has.Count.EqualTo(0),
-            $"Most tables should have a primary key. PK missing on tables {string.Join(", ", badlyNamedDateTypeColumns.Select(c => $"'{c}'"))}.");
+            FormattedFailureMessage(
+                "Date columns should be suffixed with 'UTC' or 'Local'. This is not the case on:",
+                badlyNamedDateTypeColumns));
     }
 }
