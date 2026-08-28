@@ -7,6 +7,10 @@ namespace Microlise.IntegrationTests.Sql.GovernanceTests;
 
 public class NamingTests : GovernanceTestBase
 {
+
+    // Add a test to make sure keywords are spelled out in full.
+
+
     [Test]
     [FilterFormat(@"\w+")]
     public void DatabaseNameTest()

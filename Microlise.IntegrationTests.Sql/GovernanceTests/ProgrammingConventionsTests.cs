@@ -7,6 +7,12 @@ namespace Microlise.IntegrationTests.Sql.GovernanceTests
 {
     public class ProgrammingConventionsTests : GovernanceTestBase
     {
+
+
+        ///  Add a check that stored procedures using TRANSACTION / ROLLBACK also have TRY CATCH
+
+
+
         [Test]
         [FilterFormat(@"\w+[.]\w+")]
         public void DoNotUseSelectStarTest()

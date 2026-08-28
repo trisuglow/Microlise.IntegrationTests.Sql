@@ -39,7 +39,6 @@ namespace Microlise.IntegrationTests.Sql.Utilities
             });
         }
 
-
         private class EnumFromDatabase
         {
             public int EnumId { get; set; }
