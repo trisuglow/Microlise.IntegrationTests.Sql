@@ -79,7 +79,7 @@ public class TransactionScopedTests
         }
         finally
         {
-            _transactionScope.Dispose();
+            _transactionScope?.Dispose();
         }
     }
     protected virtual void TestSetup()

@@ -1,4 +1,3 @@
-using System.Reflection;
 using Microlise.IntegrationTests.Sql.GovernanceTests.BaseClass;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
@@ -6,7 +5,9 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
+using NUnit.Framework.Internal.Builders;
 using NUnit.Framework.Internal.Commands;
+using System.Reflection;
 using VsTestCase = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestCase;
 using VsTestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
 
@@ -100,23 +101,8 @@ public sealed class ReferencedNUnitTestExecutor : ITestExecutor
 
             var started = DateTime.UtcNow;
             frameworkHandle.RecordStart(test);
-            try
-            {
-                invocable.Invoke();
-                Record(frameworkHandle, test, TestOutcome.Passed, null, null, DateTime.UtcNow - started);
-            }
-            catch (Exception ex)
-            {
-                var inner = ex is TargetInvocationException { InnerException: { } target } ? target : ex;
-                var outcome = inner switch
-                {
-                    IgnoreException or InconclusiveException => TestOutcome.Skipped,
-                    SuccessException => TestOutcome.Passed,
-                    ResultStateException => TestOutcome.Failed,
-                    _ => TestOutcome.Failed
-                };
-                Record(frameworkHandle, test, outcome, inner.Message, inner.StackTrace, DateTime.UtcNow - started);
-            }
+            var result = invocable.Invoke();
+            Record(frameworkHandle, test, result.Outcome, result.ErrorMessage, result.ErrorStackTrace, DateTime.UtcNow - started);
         }
     }
 
@@ -139,6 +125,14 @@ public sealed class ReferencedNUnitTestExecutor : ITestExecutor
         frameworkHandle.RecordEnd(test, outcome);
         frameworkHandle.RecordResult(result);
     }
+}
+
+internal readonly record struct TestInvocationResult(
+    TestOutcome Outcome,
+    string? ErrorMessage,
+    string? ErrorStackTrace)
+{
+    public static TestInvocationResult Passed { get; } = new(TestOutcome.Passed, null, null);
 }
 
 internal static class ReferencedNUnitCatalog
@@ -196,46 +190,118 @@ internal static class ReferencedNUnitCatalog
         }
 
 
-        
-
-        public void Invoke()
+        public TestInvocationResult Invoke()
         {
             var instance = Activator.CreateInstance(fixtureType)
                            ?? throw new InvalidOperationException($"Could not create fixture '{fixtureType.FullName}'.");
 
+            var setupSucceeded = false;
+            TestExecutionContext? executionContext = null;
+
             try
             {
                 InvokeAttributed(instance, typeof(OneTimeSetUpAttribute));
-                InvokeAttributed(instance, typeof(SetUpAttribute));
 
-                /*
-                 
-                 The following code replaces method.Invoke(... and is intended to put each test in its own context,
-                to prevent test failures accumulating as multiples for every new test that fails.
-                  
-                IMethodInfo nUnitMethod = new MethodWrapper(method.DeclaringType, method);                
-
-                var test = new TestMethod(nUnitMethod);
-                var context = new TestExecutionContext()
+                using (new TestExecutionContext.IsolatedContext())
                 {
-                    CurrentTest = test,
-                    TestObject = instance,
-                };
+                    IMethodInfo nUnitMethod = new MethodWrapper(fixtureType, method);
+                    TestCaseParameters? parms = arguments.Length > 0 ? new TestCaseParameters(arguments) : null;
+                    var test = new NUnitTestCaseBuilder().BuildTestMethod(nUnitMethod, parentSuite: null, parms);
 
-                TestCommand command = new TestMethodCommand(test);
+                    var context = TestExecutionContext.CurrentContext;
+                    executionContext = context;
+                    context.CurrentTest = test;
+                    context.CurrentResult = test.MakeTestResult();
+                    context.TestObject = instance;
+                    context.EstablishExecutionEnvironment();
 
-                command.Execute(context);
+                    try
+                    {
+                        InvokeAttributed(instance, typeof(SetUpAttribute));
+                        setupSucceeded = true;
 
-                */
-                method.Invoke(instance, arguments.Length == 0 ? null : arguments);
+                        new TestMethodCommand(test).Execute(context);
+                        return TestInvocationResult.Passed;
+                    }
+                    finally
+                    {
+                        if (setupSucceeded)
+                        {
+                            InvokeAttributed(instance, typeof(TearDownAttribute));
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return DescribeFailure(ex, executionContext);
             }
             finally
             {
-                InvokeAttributed(instance, typeof(TearDownAttribute));
                 InvokeAttributed(instance, typeof(OneTimeTearDownAttribute));
                 (instance as IDisposable)?.Dispose();
             }
         }
+
+        private static TestInvocationResult DescribeFailure(Exception ex, TestExecutionContext? context)
+        {
+            if (context?.CurrentResult is { } result)
+            {
+                if (result.AssertionResults.Count > 0)
+                {
+                    result.RecordTestCompletion();
+                }
+
+                if (result.ResultState.Status != TestStatus.Passed && !string.IsNullOrWhiteSpace(result.Message))
+                {
+                    return new TestInvocationResult(
+                        MapOutcome(result.ResultState),
+                        result.Message,
+                        result.StackTrace);
+                }
+            }
+
+            var failure = UnwrapException(ex);
+            return new TestInvocationResult(
+                MapOutcome(failure),
+                ExceptionHelper.BuildMessage(failure, excludeExceptionNames: true),
+                ExceptionHelper.BuildStackTrace(failure));
+        }
+
+        private static Exception UnwrapException(Exception ex)
+        {
+            for (;;)
+            {
+                var unwrapped = ex switch
+                {
+                    TargetInvocationException { InnerException: { } inner } => inner,
+                    NUnitException { InnerException: { } inner } nunit when nunit.Message == "Rethrown" => inner,
+                    _ => null
+                };
+
+                if (unwrapped is null)
+                {
+                    return ex;
+                }
+
+                ex = unwrapped;
+            }
+        }
+
+        private static TestOutcome MapOutcome(ResultState resultState) => resultState.Status switch
+        {
+            TestStatus.Passed => TestOutcome.Passed,
+            TestStatus.Skipped => TestOutcome.Skipped,
+            TestStatus.Inconclusive => TestOutcome.Skipped,
+            _ => TestOutcome.Failed
+        };
+
+        private static TestOutcome MapOutcome(Exception ex) => ex switch
+        {
+            IgnoreException or InconclusiveException => TestOutcome.Skipped,
+            SuccessException => TestOutcome.Passed,
+            _ => TestOutcome.Failed
+        };
 
         private static void InvokeAttributed(object instance, Type attributeType)
         {
