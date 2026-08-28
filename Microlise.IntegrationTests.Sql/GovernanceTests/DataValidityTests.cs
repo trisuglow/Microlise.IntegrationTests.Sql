@@ -12,27 +12,35 @@ public class DataValidityTests : GovernanceTestBase
     [FilterFormat(@"\w+[.]\w+")]
     public void SelectFromAllViewsTest()
     {
-        var executionCount = 0;
+        var failures = new List<string>();
         var views = IntegrationTestDatabase.Query<string>(@"
             SELECT
-	            S.[name] + '.' + V.[name]
+	            TABLE_SCHEMA + '.' + TABLE_NAME
             FROM
-	            sys.views V
-            JOIN
-	            sys.schemas S ON V.schema_id = S.schema_id
-            WHERE
-	            S.[name] <> 'tSQLt'");
+	            INFORMATION_SCHEMA.VIEWS
+            WHERE	
+	            TABLE_SCHEMA <> 'tSQLt'");
 
         foreach (var view in views)
         {
-            Console.WriteLine($"Testing: {view}");
+            try
+            {
+                Console.WriteLine($"Testing: {view}");
 
-            IntegrationTestDatabase.Execute($"SELECT * FROM {view}");
-
-            executionCount += 1;
+                IntegrationTestDatabase.Execute($"SELECT * FROM {view}");
+            }
+            catch (Exception ex)
+            {
+                failures.Add($"{view} - {ex.Message}");
+            }
         }
 
-        Assert.That(executionCount, Is.EqualTo(views.Count()));
+        Assert.That(
+            failures,
+            Has.Count.EqualTo(0),
+            FormattedFailureMessage(
+                "Expecting all views to be queryable. Some are not.",
+                failures));
     }
 
     [Test]

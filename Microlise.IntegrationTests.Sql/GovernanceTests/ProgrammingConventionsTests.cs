@@ -8,26 +8,41 @@ namespace Microlise.IntegrationTests.Sql.GovernanceTests
     public class ProgrammingConventionsTests : GovernanceTestBase
     {
         [Test]
-        [FilterFormat(@"\w+[.]\w+[.]\w+")]
+        [FilterFormat(@"\w+[.]\w+")]
         public void DoNotUseSelectStarTest()
         {
-            StringBuilder sql = new(@"
+            var sql = new StringBuilder(@"
                 SELECT
-	                [Name] = ISNULL(R.ROUTINE_SCHEMA + '.' + R.ROUTINE_NAME, ''),
-                    Definition = ISNULL(R.ROUTINE_DEFINITION, '')
+                    ObjectName,
+                    ObjectDefinition
                 FROM
-	                INFORMATION_SCHEMA.ROUTINES R");
+                (
+                    SELECT
+	                    ObjectName = ISNULL(R.ROUTINE_SCHEMA + '.' + R.ROUTINE_NAME, ''),
+                        ObjectDefinition = ISNULL(R.ROUTINE_DEFINITION, '')
+                    FROM
+	                    INFORMATION_SCHEMA.ROUTINES R
+
+                    UNION ALL
+
+                    SELECT
+	                    V.TABLE_SCHEMA + '.' + V.TABLE_NAME,	
+                        V.VIEW_DEFINITION
+                    FROM
+	                    INFORMATION_SCHEMA.VIEWS V
+                ) D");
 
             if (TestHasFilters())
             {
                 sql.AppendLine($@"
-                WHERE
-                    OBJECT_SCHEMA_NAME(C.object_id) + '.' + OBJECT_NAME(C.object_id) + '.' + [name] NOT IN {TestFilterList()}");
+                    WHERE
+                        D.ObjectName NOT IN {TestFilterList()}");
             }
 
-            var definitions = IntegrationTestDatabase.Query<(string Name, string Definition)>(sql.ToString()).ToDictionary(o => o.Name, o => o.Definition);
+            var definitions = IntegrationTestDatabase.Query<(string ObjectName, string ObjectDefinition)>(sql.ToString())
+                .ToDictionary(o => o.ObjectName, o => o.ObjectDefinition);
 
-            List<string> failures = new();
+            List<string> failures = [];
 
             foreach (var definition in definitions)
             {
@@ -42,6 +57,58 @@ namespace Microlise.IntegrationTests.Sql.GovernanceTests
                 Has.Count.EqualTo(0),
                 FormattedFailureMessage(
                     "Avoid using SELECT *. Select columns specifically in",
+                    failures));
+        }
+
+        [Test]
+        [FilterFormat(@"\w+[.]\w+")]
+        public void DoNotUseTop1000Test()
+        {
+            var sql = new StringBuilder(@"
+                SELECT
+                    ObjectName,
+                    ObjectDefinition
+                FROM
+                (
+                    SELECT
+	                    ObjectName = ISNULL(R.ROUTINE_SCHEMA + '.' + R.ROUTINE_NAME, ''),
+                        ObjectDefinition = ISNULL(R.ROUTINE_DEFINITION, '')
+                    FROM
+	                    INFORMATION_SCHEMA.ROUTINES R
+
+                    UNION ALL
+
+                    SELECT
+	                    V.TABLE_SCHEMA + '.' + V.TABLE_NAME,	
+                        V.VIEW_DEFINITION
+                    FROM
+	                    INFORMATION_SCHEMA.VIEWS V
+                ) D");
+            if (TestHasFilters())
+            {
+                sql.AppendLine($@"
+                WHERE
+                    D.ObjectName NOT IN {TestFilterList()}");
+            }
+
+            var definitions = IntegrationTestDatabase.Query<(string ObjectName, string ObjectDefinition)>(sql.ToString())
+                .ToDictionary(o => o.ObjectName, o => o.ObjectDefinition);
+
+            List<string> failures = [];
+
+            foreach (var definition in definitions)
+            {
+                if (definition.Value.Replace(" ", "").Replace("\n", "").Replace("\r", "").Replace("\t", "").Replace("(", "").Contains("TOP1000"))
+                {
+                    failures.Add(definition.Key);
+                }
+            }
+
+            Assert.That(
+                failures,
+                Has.Count.EqualTo(0),
+                FormattedFailureMessage(
+                    "Avoid using TOP 1000. This is likely a cut-and-paste error. If this is by design, then exclude this test for",
                     failures));
         }
     }
