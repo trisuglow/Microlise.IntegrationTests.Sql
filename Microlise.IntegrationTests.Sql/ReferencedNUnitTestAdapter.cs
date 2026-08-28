@@ -4,6 +4,9 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Framework;
+using NUnit.Framework.Interfaces;
+using NUnit.Framework.Internal;
+using NUnit.Framework.Internal.Commands;
 using VsTestCase = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestCase;
 using VsTestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
 
@@ -192,6 +195,9 @@ internal static class ReferencedNUnitCatalog
             };
         }
 
+
+        
+
         public void Invoke()
         {
             var instance = Activator.CreateInstance(fixtureType)
@@ -201,6 +207,26 @@ internal static class ReferencedNUnitCatalog
             {
                 InvokeAttributed(instance, typeof(OneTimeSetUpAttribute));
                 InvokeAttributed(instance, typeof(SetUpAttribute));
+
+                /*
+                 
+                 The following code replaces method.Invoke(... and is intended to put each test in its own context,
+                to prevent test failures accumulating as multiples for every new test that fails.
+                  
+                IMethodInfo nUnitMethod = new MethodWrapper(method.DeclaringType, method);                
+
+                var test = new TestMethod(nUnitMethod);
+                var context = new TestExecutionContext()
+                {
+                    CurrentTest = test,
+                    TestObject = instance,
+                };
+
+                TestCommand command = new TestMethodCommand(test);
+
+                command.Execute(context);
+
+                */
                 method.Invoke(instance, arguments.Length == 0 ? null : arguments);
             }
             finally
