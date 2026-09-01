@@ -8,13 +8,10 @@ namespace Microlise.IntegrationTests.Sql;
 
 public class TransactionScopedTests
 {
+    private TransactionScope? _transactionScope;
 
 
-
-    private TransactionScope _transactionScope;
-
-
-    protected static IIntegrationTestLibraryConfiguration IntegrationTestConfiguration
+    protected static IMicroliseIntegrationTestsSqlConfiguration IntegrationTestConfiguration
     {
         get
         {
@@ -23,19 +20,12 @@ public class TransactionScopedTests
 
             var root = builder.Build();
 
-            var config = root.GetSection("IntegrationTestLibraryConfiguration").Get<IntegrationTestLibraryConfiguration>();
-            //IntegrationTestLibraryConfiguration config = new();
-
-            //config.ConnectionString = root.GetSection("IntegrationTestLibraryConfiguration").Get<IntegrationTestLibraryConfiguration>().ConnectionString;
+            var config = root.GetSection("Microlise.IntegrationTestLibrary.Sql.Configuration").Get<MicroliseIntegrationTestsSqlConfiguration>();
 
             if (string.IsNullOrWhiteSpace(config?.ConnectionString))
             {
                 throw new ArgumentException("Expecting to find a section called 'Microlise.IntegrationTests.Sql' in an appsettings.json file in the test project.");
             }
-
-            //config.TestFilters = root.GetSection("IntegrationTestLibraryConfiguration").GetSection("TestFilters").Get<Dictionary<string, List<string>>>();
-
-
 
             return config;
         }

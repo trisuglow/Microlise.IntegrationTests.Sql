@@ -1,5 +1,7 @@
-﻿using System.Reflection;
+﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Microlise.IntegrationTests.Sql.GovernanceTests.BaseClass;
@@ -41,8 +43,20 @@ public abstract class GovernanceTestBase : TransactionScopedTests
         return "( " + string.Join(", ", testFilters.Select(e => $"'{e}'")) + " )";
     }
 
-    protected static string FormattedFailureMessage(string message, IEnumerable<string> failureCases)
+    protected string FormattedFailureMessage(string message, IEnumerable<string> failureCases, [CallerMemberName] string testName = "")
     {
-        return $"{message}{Environment.NewLine}{string.Join($",{Environment.NewLine}", failureCases.Select(c => $"\t'{c}'"))}.";
+        var testFilterKey = $"{GetType().Name}.{testName}";
+
+        var filterHint = new StringBuilder($"{Environment.NewLine}{Environment.NewLine}");
+        filterHint.AppendLine("If you have a valid reason to filter this result out of the test then add something similar to the following to the configuration in appsettings.");
+        filterHint.AppendLine();
+        filterHint.AppendLine("\"TestFilters\": {");
+        filterHint.AppendLine($"\t\"{testFilterKey}\": [");
+        filterHint.AppendLine($"\t\t\"{failureCases.FirstOrDefault()}\"");
+        filterHint.AppendLine("\t],");
+        filterHint.AppendLine("}");
+        filterHint.AppendLine();
+
+        return $"{message}{Environment.NewLine}{string.Join($",{Environment.NewLine}", failureCases.Select(c => $"\t'{c}'"))}{filterHint}";
     }
 }

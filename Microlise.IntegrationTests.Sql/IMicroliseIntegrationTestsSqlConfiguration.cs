@@ -1,6 +1,6 @@
 ﻿namespace Microlise.IntegrationTests.Sql
 {
-    public interface IIntegrationTestLibraryConfiguration
+    public interface IMicroliseIntegrationTestsSqlConfiguration
     {
         public string ConnectionString { get; set; }
 
