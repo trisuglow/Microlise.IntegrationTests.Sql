@@ -16,32 +16,73 @@ public abstract class GovernanceTestBase : TransactionScopedTests
         }
     }
 
-    protected bool TestHasFilters([CallerMemberName] string testName = "")
-    {
-        return IntegrationTestConfiguration.TestFilters.ContainsKey($"{GetType().Name}.{testName}");
-    }
-
-    protected string TestFilterList([CallerMemberName] string testName = "")
+    /// <summary>
+    /// Creates a SQL query string, automatically applying the Test Filters.
+    /// </summary>
+    /// <param name="sqlQuery">Query must return the object name as ObjectName.</param>
+    /// <param name="testName">Do not specify this - it is filled in by middleware.</param>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
+    protected string CreateTestSqlString(string sqlQuery, [CallerMemberName] string testName = "")
     {
         var testFilterKey = $"{GetType().Name}.{testName}";
         MethodBase? method = GetType().GetMethod(testName);
 
-        FilterFormatAttribute attr = (FilterFormatAttribute)method!.GetCustomAttributes(typeof(FilterFormatAttribute), true)[0];
-        string filterFormat = attr.Format;
-        var regex = new Regex(filterFormat);
+        var sql = new StringBuilder("SELECT * FROM");
+        sql.AppendLine("(");
+        sql.AppendLine(sqlQuery);
+        sql.AppendLine(") WRAPPER");
 
-        var testFilters = IntegrationTestConfiguration.TestFilters[testFilterKey];
-
-        testFilters.ForEach(f =>
+        if (IntegrationTestConfiguration.TestFilters.ContainsKey($"{GetType().Name}.{testName}"))
         {
-            if (!regex.Match(f).Success)
-            {
-                throw new Exception($"Bad filter for {testFilterKey} - '{f}'. Should match regex [{filterFormat}]. Check appsettings.json file.");
-            }
-        });
+            sql.AppendLine("WHERE ObjectName NOT IN");
 
-        return "( " + string.Join(", ", testFilters.Select(e => $"'{e}'")) + " )";
+            FilterFormatAttribute attr = (FilterFormatAttribute)method!.GetCustomAttributes(typeof(FilterFormatAttribute), true)[0];
+            string filterFormat = attr.Format;
+            var regex = new Regex(filterFormat);
+
+            var testFilters = IntegrationTestConfiguration.TestFilters[testFilterKey];
+
+            testFilters.ForEach(f =>
+            {
+                if (!regex.Match(f).Success)
+                {
+                    throw new Exception($"Bad filter for {testFilterKey} - '{f}'. Should match regex [{filterFormat}]. Check appsettings.json file.");
+                }
+            });
+
+            sql.AppendLine("( " + string.Join(", ", testFilters.Select(e => $"'{e}'")) + " )");
+        }
+
+        return sql.ToString();
     }
+
+    //protected bool TestHasFilters([CallerMemberName] string testName = "")
+    //{
+    //    return IntegrationTestConfiguration.TestFilters.ContainsKey($"{GetType().Name}.{testName}");
+    //}
+
+    //protected string TestFilterList([CallerMemberName] string testName = "")
+    //{
+    //    var testFilterKey = $"{GetType().Name}.{testName}";
+    //    MethodBase? method = GetType().GetMethod(testName);
+
+    //    FilterFormatAttribute attr = (FilterFormatAttribute)method!.GetCustomAttributes(typeof(FilterFormatAttribute), true)[0];
+    //    string filterFormat = attr.Format;
+    //    var regex = new Regex(filterFormat);
+
+    //    var testFilters = IntegrationTestConfiguration.TestFilters[testFilterKey];
+
+    //    testFilters.ForEach(f =>
+    //    {
+    //        if (!regex.Match(f).Success)
+    //        {
+    //            throw new Exception($"Bad filter for {testFilterKey} - '{f}'. Should match regex [{filterFormat}]. Check appsettings.json file.");
+    //        }
+    //    });
+
+    //    return "( " + string.Join(", ", testFilters.Select(e => $"'{e}'")) + " )";
+    //}
 
     protected string FormattedFailureMessage(string message, IEnumerable<string> failureCases, [CallerMemberName] string testName = "")
     {

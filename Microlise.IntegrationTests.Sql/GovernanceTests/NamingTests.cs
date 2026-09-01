@@ -15,12 +15,9 @@ public class NamingTests : GovernanceTestBase
     [FilterFormat(@"\w+")]
     public void DatabaseNameTest()
     {
-        var dbName = IntegrationTestDatabase.QueryFirstOrDefault<string>("SELECT DB_NAME()") ?? "";
+        var sqlString = CreateTestSqlString("SELECT ObjectName = DB_NAME()");
 
-        if (TestHasFilters() && TestFilterList().Contains($"'{dbName}'"))
-        {
-            return;
-        }
+        var dbName = IntegrationTestDatabase.QueryFirstOrDefault<string>(sqlString) ?? "";
 
         Assert.That(
             dbName,
@@ -32,9 +29,9 @@ public class NamingTests : GovernanceTestBase
     [FilterFormat(@"\w+[.]\w+[.]\w+")]
     public void DateColumnsSuffixedWithLocalOrUtcTest()
     {
-        StringBuilder sql = new(@"
+        var sqlString = CreateTestSqlString(@"
             SELECT
-                OBJECT_SCHEMA_NAME(C.object_id) + '.' + OBJECT_NAME(C.object_id) + '.' + C.[name]
+                ObjectName = OBJECT_SCHEMA_NAME(C.object_id) + '.' + OBJECT_NAME(C.object_id) + '.' + C.[name]
             FROM
 	            sys.all_columns C
             JOIN
@@ -50,14 +47,7 @@ public class NamingTests : GovernanceTestBase
             AND
                 C.[name] NOT LIKE '%local'");
 
-        if (TestHasFilters())
-        {
-            sql.AppendLine($@"
-                AND
-                    OBJECT_SCHEMA_NAME(C.object_id) + '.' + OBJECT_NAME(C.object_id) + '.' + C.[name] NOT IN {TestFilterList()}");
-        }
-
-        var badlyNamedDateTypeColumns = IntegrationTestDatabase.Query<string>(sql.ToString());
+        var badlyNamedDateTypeColumns = IntegrationTestDatabase.Query<string>(sqlString);
 
         Assert.That(
             badlyNamedDateTypeColumns.ToList(),

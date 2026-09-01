@@ -17,7 +17,7 @@ namespace Microlise.IntegrationTests.Sql.GovernanceTests
         [FilterFormat(@"\w+[.]\w+")]
         public void DoNotUseSelectStarTest()
         {
-            var sql = new StringBuilder(@"
+            var sqlString = CreateTestSqlString(@"
                 SELECT
                     ObjectName,
                     ObjectDefinition
@@ -38,14 +38,7 @@ namespace Microlise.IntegrationTests.Sql.GovernanceTests
 	                    INFORMATION_SCHEMA.VIEWS V
                 ) D");
 
-            if (TestHasFilters())
-            {
-                sql.AppendLine($@"
-                    WHERE
-                        D.ObjectName NOT IN {TestFilterList()}");
-            }
-
-            var definitions = IntegrationTestDatabase.Query<(string ObjectName, string ObjectDefinition)>(sql.ToString())
+            var definitions = IntegrationTestDatabase.Query<(string ObjectName, string ObjectDefinition)>(sqlString.ToString())
                 .ToDictionary(o => o.ObjectName, o => o.ObjectDefinition);
 
             List<string> failures = [];
@@ -70,10 +63,11 @@ namespace Microlise.IntegrationTests.Sql.GovernanceTests
         [FilterFormat(@"\w+[.]\w+")]
         public void DoNotUseTop1000Test()
         {
-            var sql = new StringBuilder(@"
+            var sqlString = CreateTestSqlString(
+                @"
                 SELECT
-                    ObjectName,
-                    ObjectDefinition
+                    D.ObjectName,
+                    D.ObjectDefinition
                 FROM
                 (
                     SELECT
@@ -90,14 +84,8 @@ namespace Microlise.IntegrationTests.Sql.GovernanceTests
                     FROM
 	                    INFORMATION_SCHEMA.VIEWS V
                 ) D");
-            if (TestHasFilters())
-            {
-                sql.AppendLine($@"
-                WHERE
-                    D.ObjectName NOT IN {TestFilterList()}");
-            }
 
-            var definitions = IntegrationTestDatabase.Query<(string ObjectName, string ObjectDefinition)>(sql.ToString())
+            var definitions = IntegrationTestDatabase.Query<(string ObjectName, string ObjectDefinition)>(sqlString)
                 .ToDictionary(o => o.ObjectName, o => o.ObjectDefinition);
 
             List<string> failures = [];

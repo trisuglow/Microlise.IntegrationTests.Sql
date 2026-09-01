@@ -47,9 +47,9 @@ public class DataValidityTests : GovernanceTestBase
     [FilterFormat(@"\w+[.]\w+")]
     public void PrimaryKeyOnAllTablesTest()
     {
-        StringBuilder sql = new(@"
+        var sqlString = CreateTestSqlString(@"
                 SELECT
-                    OBJECT_SCHEMA_NAME(O.object_id) + '.' + OBJECT_NAME(O.object_id)
+                    ObjectName = OBJECT_SCHEMA_NAME(O.object_id) + '.' + OBJECT_NAME(O.object_id)
                 FROM 
 	                sys.objects O
                 LEFT JOIN
@@ -61,14 +61,7 @@ public class DataValidityTests : GovernanceTestBase
                 AND
                     I.[name] IS NULL");
 
-        if (TestHasFilters())
-        {
-            sql.AppendLine($@"
-                AND
-                    OBJECT_SCHEMA_NAME(O.object_id) + '.' + OBJECT_NAME(O.object_id) NOT IN {TestFilterList()}");
-        }
-
-        var tablesWithNoPrimaryKey = IntegrationTestDatabase.Query<string>(sql.ToString());
+        var tablesWithNoPrimaryKey = IntegrationTestDatabase.Query<string>(sqlString);
 
         Assert.That(
             tablesWithNoPrimaryKey.ToList(),

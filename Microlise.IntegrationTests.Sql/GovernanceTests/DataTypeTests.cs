@@ -11,9 +11,9 @@ public class DataTypeTests : GovernanceTestBase
     [FilterFormat(@"\w+[.]\w+[.]\w+")]
     public void UseDatetime2Test()
     {
-        StringBuilder sql = new(@"
+        var sqlString = CreateTestSqlString(@"
                 SELECT
-                    OBJECT_SCHEMA_NAME(C.object_id) + '.' + OBJECT_NAME(C.object_id) + '.' + [name]
+                    ObjectName = OBJECT_SCHEMA_NAME(C.object_id) + '.' + OBJECT_NAME(C.object_id) + '.' + [name]
                 FROM
 	                sys.all_columns C
                 WHERE
@@ -23,14 +23,7 @@ public class DataTypeTests : GovernanceTestBase
                 AND
                     system_type_id = 61 /* DATETIME */");
 
-        if (TestHasFilters())
-        {
-            sql.AppendLine($@"
-                AND
-                    OBJECT_SCHEMA_NAME(C.object_id) + '.' + OBJECT_NAME(C.object_id) + '.' + [name] NOT IN {TestFilterList()}");
-        }
-
-        var dateTypeUsage = IntegrationTestDatabase.Query<string>(sql.ToString());
+        var dateTypeUsage = IntegrationTestDatabase.Query<string>(sqlString);
 
         Assert.That(
             dateTypeUsage.ToList(),
@@ -44,24 +37,17 @@ public class DataTypeTests : GovernanceTestBase
     [FilterFormat(@"\w+[.]\w+[.]\w+")]
     public void UseDecimalRatherThanNumericTest()
     {
-        StringBuilder sql = new( @"
-                SELECT
-                    OBJECT_SCHEMA_NAME(C.object_id) + '.' + OBJECT_NAME(C.object_id) + '.' + [name]
-                FROM
-	                sys.all_columns C
-                WHERE
-                    OBJECT_SCHEMA_NAME(C.object_id) <> 'sys'
-                AND
-                    system_type_id = 106 /* NUMERIC*/");
+        var sqlString = CreateTestSqlString(@"
+            SELECT
+                ObjectName = OBJECT_SCHEMA_NAME(C.object_id) + '.' + OBJECT_NAME(C.object_id) + '.' + [name]
+            FROM
+	            sys.all_columns C
+            WHERE
+                OBJECT_SCHEMA_NAME(C.object_id) <> 'sys'
+            AND
+                system_type_id = 106 /* NUMERIC*/");
 
-        if (TestHasFilters())
-        {
-            sql.AppendLine($@"
-                AND
-                    OBJECT_SCHEMA_NAME(C.object_id) + '.' + OBJECT_NAME(C.object_id) + '.' + [name] NOT IN {TestFilterList()}");
-        }
-
-        var numericTypeUsage = IntegrationTestDatabase.Query<string>(sql.ToString());
+        var numericTypeUsage = IntegrationTestDatabase.Query<string>(sqlString);
 
         Assert.That(
             numericTypeUsage.ToList(),
